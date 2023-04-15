@@ -65,6 +65,11 @@ def add_pre_create_dir(__dir_name_____:str):
 makefile_contains = str()
 
 def gen_makefile(_source_path,_build_dir):
+
+    global cflags
+    global cxxflags
+    global rustflags
+
     os.chdir(_source_path)
     print("entering " + _source_path)
 
