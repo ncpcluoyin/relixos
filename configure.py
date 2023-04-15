@@ -81,7 +81,7 @@ def gen_makefile(_source_path,_build_dir):
     bak_cxxflags = cxxflags
     bak_rustflags = rustflags
 
-    file_list = listdir()
+    file_list = os.listdir()
     dir_list = list()
     configuration_json = dict()
     c_cxx_includes = list()

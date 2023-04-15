@@ -2,6 +2,7 @@
     "ignore":[
         ".gitignore",
         "configure.py",
-        "LICENSE"
+        "LICENSE",
+        ".git"
     ]
 }
