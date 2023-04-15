@@ -178,6 +178,7 @@ def gen_makefile(_source_path,_build_dir):
 
 
 def add_line(_T:str):
+    global makefile_contains
     makefile_contains = makefile_contains + _T + "\n"
 
 def c_file_com(_I:str,_O:str,_R:list,flags:str):#gen c language makefile
