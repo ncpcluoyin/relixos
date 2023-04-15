@@ -34,8 +34,9 @@ all_build_tools = [cc,cxx,ld,make,rustc]
 #check function
 
 def __check_tools__func(tool_name:str):
-    if os.system(tool_name + " --version") != True:
+    if os.system(tool_name + " --version") != 0:
         print(tool_name + " not found in your system")
+        exit(1)
 
 def check_tools(tools:list):
     for tool_name__ in tools:
