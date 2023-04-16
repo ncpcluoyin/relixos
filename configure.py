@@ -243,7 +243,7 @@ def cxx_file_com(_I:str,_O:str,_R:list,flags:str):#gen c++ language makefile
     add_line(_O + ":" + relays + " " + _I)
     add_line("\t" + cxx + " " + cxx_includes + " " + flags + " -c " + _I + " -o " + _O)
 
-def asm_file_com(_I:str,_O:str,_R:list,flags:str):#gen c language makefile
+def asm_file_com(_I:str,_O:str,_R:list,flags:str):#gen asm language makefile
     relays = str()
     relays_dir_list = list()
     relays_file_list = list()
@@ -273,6 +273,9 @@ def asm_file_com(_I:str,_O:str,_R:list,flags:str):#gen c language makefile
         relays = relays + " " + includes
     add_line(_O + ":" + relays + " " + _I)
     add_line("\t" + cc + " " + cc_includes + " " + flags + " -c " + _I + " -o " + _O)
+
+#def rust_file_com(_I:str,_O:str,_R:list,flags:str):#gen rust language makefile
+
 
 #gen makefile function end
 
