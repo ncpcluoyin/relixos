@@ -1,4 +1,4 @@
-
+#!/usr/bin/python3
 #imports
 
 import os
@@ -37,6 +37,8 @@ def __check_tools__func(tool_name:str):
     if os.system(tool_name + " --version") != 0:
         print(tool_name + " not found in your system")
         exit(1)
+    else:
+        print(tool_name + " found")
 
 def check_tools(tools:list):
     for tool_name__ in tools:
@@ -49,8 +51,11 @@ def check_tools(tools:list):
 
 pre_create_dirs_abs_ = list()
 
-def dir_create(_dirs_:list):
-    for dir__ in _dirs_:
+def dir_create(_dirs_:list,build_abs__:str):
+    creates = _dirs_
+    if build_abs__ in _dirs_:
+        creates.remove(build_abs__)
+    for dir__ in creates:
         os.system("mkdir -p -v " + dir__)
 
 def add_pre_create_dir(__dir_name_____:str):
@@ -289,7 +294,7 @@ project_source_dir = path.abspath(path.dirname(__file__))
 if __name__ == "__main__":
     check_tools(all_build_tools)
     gen_makefile(project_source_dir, project_build_dir + "/build")
-    dir_create(pre_create_dirs_abs_)
+    dir_create(pre_create_dirs_abs_,project_build_dir)
     makefile_output = open(project_build_dir + "/Makefile","w")
     makefile_output.writelines(makefile_contains)
     makefile_output.close()
