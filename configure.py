@@ -51,10 +51,12 @@ def check_tools(tools:list):
 
 pre_create_dirs_abs_ = list()
 
-def dir_create(_dirs_:list,build_abs__:str):
+def dir_create(_dirs_:list,build_abs__:str,source_abs__:str):
     creates = _dirs_
     if build_abs__ in _dirs_:
         creates.remove(build_abs__)
+    if path.dirname(build_abs__) == source_abs__:
+        creates.remove(build_abs__ + "/build/" + build_abs__[len(path.dirname(build_abs__))+1:] )
     for dir__ in creates:
         os.system("mkdir -p -v " + dir__)
 
@@ -294,7 +296,7 @@ project_source_dir = path.abspath(path.dirname(__file__))
 if __name__ == "__main__":
     check_tools(all_build_tools)
     gen_makefile(project_source_dir, project_build_dir + "/build")
-    dir_create(pre_create_dirs_abs_,project_build_dir)
+    dir_create(pre_create_dirs_abs_,project_build_dir,project_source_dir)
     makefile_output = open(project_build_dir + "/Makefile","w")
     makefile_output.writelines(makefile_contains)
     makefile_output.close()
