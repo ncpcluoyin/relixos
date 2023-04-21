@@ -5,6 +5,7 @@ import os
 from os import path
 from pathlib import Path
 import json
+import copy
 
 #imports end
 
@@ -132,7 +133,7 @@ def gen_makefile(_source_path,_build_dir):
                 print("exit")
                 exit(1)
             rustflags = configuration_json["rustflags"]
-    file_list_back = file_list
+    file_list_back = copy.deepcopy(file_list)
     for file_dir_name__ in file_list_back:
         if path.isdir(file_dir_name__):
             file_list.remove(file_dir_name__)
