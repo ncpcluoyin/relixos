@@ -72,6 +72,18 @@ def add_pre_create_dir(__dir_name_____:str):
 
 makefile_contains = str()
 
+final_makefile = str()
+
+all_object_files = list()
+
+def gen_headers():
+    final_make(_T)("#created by configure.py")
+    final_make(_T)("\n\n\n")
+
+def final_make(_T:str):
+    global final_makefile
+    final_makefile = final_makefile + _T + "\n"
+
 def gen_makefile(_source_path,_build_dir):
 
     global cflags
@@ -97,6 +109,22 @@ def gen_makefile(_source_path,_build_dir):
         print("configuration.json found")
         file_list.remove("configuration.json")
         configuration_json = json.loads(Path("configuration.json").read_text())
+        if ("select" in list(configuration_json.keys())) and ("ignore" in list(configuration_json.keys())):
+            print("There are both \"select\" and \"ignore\" in the " + path.abspath("configuration.json"))
+            print("you should delete one of them")
+            print("exit")
+            exit(1)
+        if "select" in list(configuration_json.keys()):
+            select_list = configuration_json["select"]
+            if not isinstance(select_list,list):
+                print("in " + path.abspath("configuration.json") + " \"select\" should be an array")
+                print("exit")
+                exit(1)
+            select_list_back = copy.deepcopy(select_list)
+            for contains in select_list_back:
+                if not path.exists(contains):
+                    select_list.remove(contains)
+            file_list = select_list
         if "ignore" in list(configuration_json.keys()):#ignore files and directories
             ignore_file_dir_list = configuration_json["ignore"]
             if not isinstance(ignore_file_dir_list,list):
@@ -295,12 +323,19 @@ project_source_dir = path.abspath(path.dirname(__file__))
 
 
 if __name__ == "__main__":
+    #preparation
     check_tools(all_build_tools)
+    gen_headers()
     gen_makefile(project_source_dir, project_build_dir + "/build")
+
+
+    #gen makefile and create directories
     dir_create(pre_create_dirs_abs_,project_build_dir,project_source_dir)
     makefile_output = open(project_build_dir + "/Makefile","w")
     makefile_output.writelines(makefile_contains)
     makefile_output.close()
+
+    #end
     print("done")
     exit(0)
 
