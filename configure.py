@@ -87,8 +87,8 @@ final_makefile = str()
 all_object_files = list()
 
 def gen_headers():
-    final_make(_T)("#created by configure.py")
-    final_make(_T)("\n\n\n")
+    final_make("#created by configure.py")
+    final_make("\n\n\n")
 
 def final_make(_T:str):
     global final_makefile
