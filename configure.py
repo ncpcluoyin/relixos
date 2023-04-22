@@ -22,11 +22,21 @@ rustc = target + "-gccrs"
 
 make = "make"
 
-commonflags = "-O3 -ffreestanding"
+commonflags = "-O3"
 
-cflags = commonflags
-cxxflags = commonflags
+cflags = commonflags + " -std=gnu99"
+cxxflags = commonflags + " -std=gnu++11"
 rustflags = commonflags
+
+#force flags
+
+commonflags_force = "-Wall -Wextra -ffreestanding"
+
+cflags_force = commonflags_force
+cxxflags_force = commonflags_force
+rustflags_force = commonflags_force
+
+#force flags end
 
 all_build_tools = [cc,cxx,ld,make,rustc]
 
@@ -179,6 +189,9 @@ def gen_makefile(_source_path,_build_dir):
         if path.splitext(source_file)[-1] == ".hh":
             c_cxx_includes.append(source_file)
             print(source_file)
+        if path.splitext(source_file)[-1] == ".h++":
+            c_cxx_includes.append(source_file)
+            print(source_file)
     for source_file in file_list:#gen makefile
         if path.splitext(source_file)[-1] == ".c":
             c_file_com(path.abspath(source_file),path.abspath(_build_dir) + "/" + path.splitext(source_file)[0] + "_c.o", c_cxx_includes,cflags)
@@ -192,6 +205,9 @@ def gen_makefile(_source_path,_build_dir):
         if path.splitext(source_file)[-1] == ".cpp":
             cxx_file_com(path.abspath(source_file),path.abspath(_build_dir) + "/" + path.splitext(source_file)[0] + "_cpp.o", c_cxx_includes,cxxflags)
             print(source_file + " : " + path.splitext(source_file)[0] + "_cpp.o")
+        if path.splitext(source_file)[-1] == ".c++":
+            cxx_file_com(path.abspath(source_file),path.abspath(_build_dir) + "/" + path.splitext(source_file)[0] + "_c++.o", c_cxx_includes,cxxflags)
+            print(source_file + " : " + path.splitext(source_file)[0] + "_c++.o")
         if path.splitext(source_file)[-1] == ".s":
             asm_file_com(path.abspath(source_file),path.abspath(_build_dir) + "/" + path.splitext(source_file)[0] + "_s.o", c_cxx_includes,cflags)
             print(source_file + " : " + path.splitext(source_file)[0] + "_s.o")
@@ -246,7 +262,7 @@ def c_file_com(_I:str,_O:str,_R:list,flags:str):#gen c language makefile
     for includes in relays_file_list:
         relays = relays + " " + includes
     add_line(_O + ":" + relays + " " + _I)
-    add_line("\t" + cc + " " + cc_includes + " " + flags + " -c " + _I + " -o " + _O)
+    add_line("\t" + cc + " " + cc_includes + " " + flags + " " + cflags_force + " -c " + _I + " -o " + _O)
 
 def cxx_file_com(_I:str,_O:str,_R:list,flags:str):#gen c++ language makefile
     relays = str()
@@ -277,7 +293,7 @@ def cxx_file_com(_I:str,_O:str,_R:list,flags:str):#gen c++ language makefile
     for includes in relays_file_list:
         relays = relays + " " + includes
     add_line(_O + ":" + relays + " " + _I)
-    add_line("\t" + cxx + " " + cxx_includes + " " + flags + " -c " + _I + " -o " + _O)
+    add_line("\t" + cxx + " " + cxx_includes + " " + flags + " " + cxxflags_force + " -c " + _I + " -o " + _O)
 
 def asm_file_com(_I:str,_O:str,_R:list,flags:str):#gen asm language makefile
     relays = str()
@@ -308,7 +324,7 @@ def asm_file_com(_I:str,_O:str,_R:list,flags:str):#gen asm language makefile
     for includes in relays_file_list:
         relays = relays + " " + includes
     add_line(_O + ":" + relays + " " + _I)
-    add_line("\t" + cc + " " + cc_includes + " " + flags + " -c " + _I + " -o " + _O)
+    add_line("\t" + cc + " " + cc_includes + " " + flags  + " " + cflags_force + " -c " + _I + " -o " + _O)
 
 #def rust_file_com(_I:str,_O:str,_R:list,flags:str):#gen rust language makefile
 
