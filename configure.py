@@ -113,7 +113,7 @@ def gen_images(__images___:dict,objects:list):
     for file in objects:
         a = a + " " + file
     for image in list(__images___.keys()):
-        add_line(__images__[image] + ":" + image + a)
+        add_line(__images___[image] + ":" + image + a)
         add_line("\t" + "cd " + path.dirname(image) + " && " + cc + " -T " + image + " -o " + __images__[image] + a + " " + ldflags)
 
 def gen_makefile(_source_path,_build_dir):
