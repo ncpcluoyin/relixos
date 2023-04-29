@@ -16,8 +16,6 @@ target = "x86_64-elf"
 cc = target + "-gcc"
 cxx = target + "-g++"
 
-ld = target + "-ld"
-
 rustc = target + "-gccrs"
 
 make = "make"
@@ -30,6 +28,8 @@ rustflags = commonflags
 
 #force flags
 
+ldflags = "-ffreestanding " + commonflags + " -nostdlib -lgcc"
+
 commonflags_force = "-Wall -Wextra -ffreestanding"
 
 cflags_force = commonflags_force
@@ -38,7 +38,7 @@ rustflags_force = commonflags_force
 
 #force flags end
 
-all_build_tools = [cc,cxx,ld,make,rustc]
+all_build_tools = [cc,cxx,make,rustc]
 
 #options_end
 
@@ -86,13 +86,35 @@ final_makefile = str()
 
 all_object_files = list()
 
-def gen_headers():
+images = dict()
+
+def _join():
+    final_make("\n")
+    final_make(makefile_contains)
+
+
+def gen_headers(files:list,links:dict):
     final_make("#created by configure.py")
-    final_make("\n\n\n")
+    final_make("\n")
+    a = str()
+    for file in files:
+        a = a + " " + file
+    for link in list(links.values()):
+        a = a + " " + link
+    final_make("all:" + a)
+    final_make("\n")
 
 def final_make(_T:str):
     global final_makefile
     final_makefile = final_makefile + _T + "\n"
+
+def gen_images(__images___:dict,objects:list):
+    a = str()
+    for file in objects:
+        a = a + " " + file
+    for image in list(__images___.keys()):
+        add_line(__images__[image] + ":" + image + a)
+        add_line("\t" + "cd " + path.dirname(image) + " && " + cc + " -T " + image + " -o " + __images__[image] + " " + ldflags)
 
 def gen_makefile(_source_path,_build_dir):
 
@@ -217,8 +239,12 @@ def gen_makefile(_source_path,_build_dir):
         if path.splitext(source_file)[-1] == ".S":
             asm_file_com(path.abspath(source_file),path.abspath(_build_dir) + "/" + path.splitext(source_file)[0] + "_S.o", c_cxx_includes,cflags)
             print(source_file + " : " + path.splitext(source_file)[0] + "_S.o")
+        if path.splitext(source_file)[-1] == ".lds":
+            images[path.abspath(source_file)] = path.abspath(_build_dir) + "/" + path.splitext(source_file)[0] + "_lds.bin"
+        if path.splitext(source_file)[-1] == ".ld":
+            images[path.abspath(source_file)] = path.abspath(_build_dir) + "/" + path.splitext(source_file)[0] + "_ld.bin"
 
-    #restore flags
+    #reset flags
     cflags = bak_cflags
     cxxflags = bak_cxxflags
     rustflags = bak_rustflags
@@ -262,7 +288,7 @@ def c_file_com(_I:str,_O:str,_R:list,flags:str):#gen c language makefile
     for includes in relays_file_list:
         relays = relays + " " + includes
     add_line(_O + ":" + relays + " " + _I)
-    add_line("\t" + cc + " " + cc_includes + " " + flags + " " + cflags_force + " -c " + _I + " -o " + _O)
+    add_line("\t" + "cd " + path.dirname(_O) + " && " + cc + " " + cc_includes + " " + flags + " " + cflags_force + " -c " + _I + " -o " + _O)
     all_object_files.append(_O)
 
 def cxx_file_com(_I:str,_O:str,_R:list,flags:str):#gen c++ language makefile
@@ -294,7 +320,7 @@ def cxx_file_com(_I:str,_O:str,_R:list,flags:str):#gen c++ language makefile
     for includes in relays_file_list:
         relays = relays + " " + includes
     add_line(_O + ":" + relays + " " + _I)
-    add_line("\t" + cxx + " " + cxx_includes + " " + flags + " " + cxxflags_force + " -c " + _I + " -o " + _O)
+    add_line("\t" + "cd " + path.dirname(_O) + " && " + cxx + " " + cxx_includes + " " + flags + " " + cxxflags_force + " -c " + _I + " -o " + _O)
     all_object_files.append(_O)
 
 def asm_file_com(_I:str,_O:str,_R:list,flags:str):#gen asm language makefile
@@ -326,7 +352,7 @@ def asm_file_com(_I:str,_O:str,_R:list,flags:str):#gen asm language makefile
     for includes in relays_file_list:
         relays = relays + " " + includes
     add_line(_O + ":" + relays + " " + _I)
-    add_line("\t" + cc + " " + cc_includes + " " + flags  + " " + cflags_force + " -c " + _I + " -o " + _O)
+    add_line("\t" + "cd " + path.dirname(_O) + " && " + cc + " " + cc_includes + " " + flags  + " " + cflags_force + " -c " + _I + " -o " + _O)
     all_object_files.append(_O)
 
 #def rust_file_com(_I:str,_O:str,_R:list,flags:str):#gen rust language makefile
@@ -344,14 +370,15 @@ project_source_dir = path.abspath(path.dirname(__file__))
 if __name__ == "__main__":
     #preparation
     check_tools(all_build_tools)
-    gen_headers()
     gen_makefile(project_source_dir, project_build_dir + "/build")
-
+    gen_images(images,all_object_files)
+    gen_headers(all_object_files,images)
+    _join()
 
     #gen makefile and create directories
     dir_create(pre_create_dirs_abs_,project_build_dir,project_source_dir)
     makefile_output = open(project_build_dir + "/Makefile","w")
-    makefile_output.writelines(makefile_contains)
+    makefile_output.writelines(final_makefile)
     makefile_output.close()
 
     #end
