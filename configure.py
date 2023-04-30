@@ -11,7 +11,7 @@ import copy
 
 #options
 
-options = json.loads(Path(path.dirname(path.abspath(__file__)) + "/configuration.json"))
+options = json.loads(Path(path.dirname(path.abspath(__file__)) + "/configuration.json").read_text())
 
 target = options["target"]
 
