@@ -362,6 +362,7 @@ def asm_file_com(_I:str,_O:str,_R:list,flags:str):#gen asm language makefile
 def rust_file_com(_I:str,_O:str,flags:str):#gen rust language makefile
     add_line(_O + ": " + _I)
     add_line("\t" +  "cd " + path.dirname(_O) + " && " + rustc + " " + flags + " " + rustflags_force + " -c " + _I + " -o " + _O)
+    all_object_files.append(_O)
 
 #gen makefile function end
 
