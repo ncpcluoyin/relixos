@@ -240,10 +240,13 @@ def gen_makefile(_source_path,_build_dir):
             print(source_file + " : " + path.splitext(source_file)[0] + "_S.o")
         if path.splitext(source_file)[-1] == ".lds":
             images[path.abspath(source_file)] = path.abspath(_build_dir) + "/" + path.splitext(source_file)[0] + "_lds.bin"
+            print(source_file + " : " + path.splitext(source_file)[0] + "_lds.bin")
         if path.splitext(source_file)[-1] == ".ld":
             images[path.abspath(source_file)] = path.abspath(_build_dir) + "/" + path.splitext(source_file)[0] + "_ld.bin"
+            print(source_file + " : " + path.splitext(source_file)[0] + "_ld.bin")
         if path.splitext(source_file)[-1] == ".rs":
             rust_file_com(path.abspath(source_file),path.abspath(_build_dir) + "/" + path.splitext(source_file)[0] + "_rs.o",rustflags)
+            print(source_file + " : " + path.splitext(source_file)[0] + "_rs.o")
 
     #reset flags
     cflags = bak_cflags
