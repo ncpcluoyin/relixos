@@ -242,6 +242,8 @@ def gen_makefile(_source_path,_build_dir):
             images[path.abspath(source_file)] = path.abspath(_build_dir) + "/" + path.splitext(source_file)[0] + "_lds.bin"
         if path.splitext(source_file)[-1] == ".ld":
             images[path.abspath(source_file)] = path.abspath(_build_dir) + "/" + path.splitext(source_file)[0] + "_ld.bin"
+        if path.splitext(source_file)[-1] == ".rs":
+            rust_file_com(path.abspath(source_file),path.abspath(_build_dir) + "/" + path.splitext(source_file)[0] + "_rs.o",rustflags)
 
     #reset flags
     cflags = bak_cflags
@@ -354,8 +356,9 @@ def asm_file_com(_I:str,_O:str,_R:list,flags:str):#gen asm language makefile
     add_line("\t" + "cd " + path.dirname(_O) + " && " + cc + " " + cc_includes + " " + flags  + " " + cflags_force + " -c " + _I + " -o " + _O)
     all_object_files.append(_O)
 
-#def rust_file_com(_I:str,_O:str,_R:list,flags:str):#gen rust language makefile
-
+def rust_file_com(_I:str,_O:str,flags:str):#gen rust language makefile
+    add_line(_O + ": " + _I)
+    add_line("\t" +  "cd " + path.dirname(_O) + " && " + rustc + " " + flags + " " + rustflags_force + " -c " + _I + " -o " + _O)
 
 #gen makefile function end
 
