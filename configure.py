@@ -11,7 +11,9 @@ import copy
 
 #options
 
-target = "x86_64-elf"
+options = json.loads(Path(path.dirname(path.abspath(__file__)) + "/configuration.json"))
+
+target = options["target"]
 
 cc = target + "-gcc"
 cxx = target + "-g++"
@@ -20,21 +22,18 @@ rustc = target + "-gccrs"
 
 make = "make"
 
-commonflags = "-O3"
-
-cflags = commonflags + " -std=gnu99"
-cxxflags = commonflags + " -std=gnu++11"
-rustflags = commonflags
+cflags = options["cflags"]
+cxxflags = options["cxxflags"]
+rustflags = options["rustflags"]
+ldflags = options["ldflags"]
 
 #force flags
 
-ldflags = "-ffreestanding " + commonflags + " -nostdlib -lgcc"
+commonflags_force = "-Wall -Wextra"
 
-commonflags_force = "-Wall -Wextra -ffreestanding"
-
-cflags_force = commonflags_force
-cxxflags_force = commonflags_force
-rustflags_force = commonflags_force
+cflags_force = commonflags_force + " -ffreestanding"
+cxxflags_force = commonflags_force + " -ffreestanding"
+rustflags_force = commonflags_force + " -frust-incomplete-and-experimental-compiler-do-not-use"
 
 #force flags end
 
@@ -114,7 +113,7 @@ def gen_images(__images___:dict,objects:list):
         a = a + " " + file
     for image in list(__images___.keys()):
         add_line(__images___[image] + ":" + image + a)
-        add_line("\t" + "cd " + path.dirname(image) + " && " + cc + " -T " + image + " -o " + __images___[image] + a + " " + ldflags)
+        add_line("\t" + "cd " + path.dirname(__images___[image]) + " && " + cc + " -T " + image + " -o " + __images___[image] + a + " " + ldflags)
 
 def gen_makefile(_source_path,_build_dir):
 
