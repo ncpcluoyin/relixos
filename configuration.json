@@ -1,8 +1,8 @@
 {
     "select":[],
     "target":"x86_64-elf",
-    "cflags":"-O3",
-    "cxxflags":"-O3",
-    "rustflags":"-O3",
+    "cflags":"-O3 -pipe -std=gnu99",
+    "cxxflags":"-O3 -pipe -std=gnu++11",
+    "rustflags":"-O3 -pipe",
     "ldflags":"-ffreestanding -O3 -nostdlib -lgcc"
 }

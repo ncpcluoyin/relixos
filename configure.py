@@ -115,6 +115,15 @@ def gen_images(__images___:dict,objects:list):
         add_line(__images___[image] + ":" + image + a)
         add_line("\t" + "cd " + path.dirname(__images___[image]) + " && " + cc + " -T " + image + " -o " + __images___[image] + a + " " + ldflags)
 
+def gen_functions():
+    final_make("clean:")
+    final_make("\trm -rf build")
+    for dirs in pre_create_dirs_abs_:
+        final_make("\tmkdir -p -v " + dirs)
+    final_make("")
+    final_make("delete:")
+    final_make("\trm -rf build Makefile")
+
 def gen_makefile(_source_path,_build_dir):
 
     global cflags
@@ -380,6 +389,7 @@ if __name__ == "__main__":
     gen_images(images,all_object_files)
     gen_headers(all_object_files,images)
     _join()
+    gen_functions()
 
     #gen makefile and create directories
     dir_create(pre_create_dirs_abs_,project_build_dir,project_source_dir)
