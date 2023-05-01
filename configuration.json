@@ -1,5 +1,7 @@
 {
-    "select":[],
+    "select":[
+        "boot"
+    ],
     "target":"x86_64-elf",
     "cflags":"-O3 -pipe -std=gnu99",
     "cxxflags":"-O3 -pipe -std=gnu++11",
