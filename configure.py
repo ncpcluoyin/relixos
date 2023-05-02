@@ -61,13 +61,8 @@ def check_tools(tools:list):
 
 pre_create_dirs_abs_ = list()
 
-def dir_create(_dirs_:list,build_abs__:str,source_abs__:str):
-    creates = _dirs_
-    if build_abs__ in _dirs_:
-        creates.remove(build_abs__)
-    if path.dirname(build_abs__) == source_abs__:
-        creates.remove(build_abs__ + "/build/" + build_abs__[len(path.dirname(build_abs__))+1:] )
-    for dir__ in creates:
+def dir_create(_dirs_:list):
+    for dir__ in _dirs_:
         os.system("mkdir -p -v " + dir__)
 
 def add_pre_create_dir(__dir_name_____:str):
@@ -88,20 +83,19 @@ all_object_files = list()
 images = dict()
 
 def _join():
-    final_make("\n")
     final_make(makefile_contains)
 
 
 def gen_headers(files:list,links:dict):
     final_make("#created by configure.py")
-    final_make("\n")
+    final_make("")
     a = str()
     for file in files:
         a = a + " " + file
     for link in list(links.values()):
         a = a + " " + link
     final_make("all:" + a)
-    final_make("\n")
+    final_make("")
 
 def final_make(_T:str):
     global final_makefile
@@ -392,7 +386,7 @@ if __name__ == "__main__":
     gen_functions()
 
     #gen makefile and create directories
-    dir_create(pre_create_dirs_abs_,project_build_dir,project_source_dir)
+    dir_create(pre_create_dirs_abs_)
     makefile_output = open(project_build_dir + "/Makefile","w")
     makefile_output.writelines(final_makefile)
     makefile_output.close()

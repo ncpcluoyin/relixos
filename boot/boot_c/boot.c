@@ -1,0 +1,1 @@
+void _relix_core_init(){}
