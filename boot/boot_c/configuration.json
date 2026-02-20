@@ -1,3 +1,0 @@
-{
-    "cflags":"-O3 -pipe -std=gnu99 -m32"
-}
