@@ -15,6 +15,9 @@ set(COMMON_FLAGS "-m64 -ffreestanding -fno-pie -nostdlib -nostdinc -fno-builtin 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${COMMON_FLAGS} -Wall -Wextra")
 set(CMAKE_ASM_FLAGS "${CMAKE_ASM_FLAGS} -Wa,--64")
 
+#include headers
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/headers)
+
 # 内核可执行文件
 add_executable(core.elf boot.S core.c)
 
