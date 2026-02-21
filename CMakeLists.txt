@@ -10,7 +10,7 @@ set(CMAKE_SYSTEM_PROCESSOR x86_64)
 set(CMAKE_POSITION_INDEPENDENT_CODE OFF)
 
 # 通用编译标志
-set(COMMON_FLAGS "-m64 -ffreestanding -fno-pie -nostdlib -nostdinc -fno-builtin -fno-stack-protector")
+set(COMMON_FLAGS "-m64 -ffreestanding -fno-pie -nostdlib -nostdinc -fno-builtin -fno-stack-protector -O0")
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${COMMON_FLAGS} -Wall -Wextra")
 set(CMAKE_ASM_FLAGS "${CMAKE_ASM_FLAGS} -Wa,--64")
@@ -27,13 +27,14 @@ target_link_options(core.elf PRIVATE
     -T ${CMAKE_CURRENT_SOURCE_DIR}/linker.ld
     -nostdlib
     -no-pie
+    -Wl,--build-id=none
 )
 
 set_target_properties(core.elf PROPERTIES
     LINK_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/linker.ld
 )
 
-# ------------------ ISO 镜像生成 (混合 BIOS+UEFI) ------------------
+# ------------------ ISO 镜像生成 (UEFI) ------------------
 set(ISO_ROOT ${CMAKE_CURRENT_BINARY_DIR}/iso_root)
 set(ISO_BOOT ${ISO_ROOT}/boot)
 set(ISO_BOOT_GRUB ${ISO_BOOT}/grub)

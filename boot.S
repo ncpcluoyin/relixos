@@ -2,16 +2,16 @@
 
 .section .multiboot
 .align 8
-
+.globl multiboot_header
 multiboot_header:
     /* 魔数 */
-    .long 0xE85250D6
-    /* 架构：x86_64 (4) */
-    .long 4
+    .long 0xe85250d6
+    /* 架构：x86_64 (0) */
+    .long 0
     /* 头部长度 */
     .long header_end - multiboot_header
     /* 校验和：32位求和为零 */
-    .long 0x100000000 - (0xE85250D6 + 4 + (header_end - multiboot_header))
+    .long 0x100000000 - (0xe85250d6 + 0 + (header_end - multiboot_header))
 
     /* 结束标签 */
     .word 0    /* 类型 */
