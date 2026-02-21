@@ -10,7 +10,7 @@
 void core_main(void)
 {
     char *video_memory = (char *) VGA_ADDRESS;
-    const char *message = "Hello, 64-bit Multiboot2 World!";
+    const char *message = "Hello, RelixOS!";
     int i;
 
     /* 清屏 */

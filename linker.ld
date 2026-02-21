@@ -1,21 +1,22 @@
-/* linker.ld - 改进链接脚本，区分代码段和数据段权限 */
-
 ENTRY(_start)
 
 PHDRS
 {
     text PT_LOAD FLAGS(5);   /* 读 + 执行 */
-    data PT_LOAD FLAGS(6);    /* 读 + 写 */
+    data PT_LOAD FLAGS(6);   /* 读 + 写 */
 }
 
 SECTIONS
 {
+    /* 从 1 MiB 开始加载 */
     . = 1M;
 
+    /* 将 .multiboot 节放在最前面，确保其文件偏移尽可能小 */
     .multiboot : {
         *(.multiboot)
     } :text
 
+    /* 其他代码节紧随其后 */
     .text : {
         *(.text)
     } :text
@@ -32,4 +33,12 @@ SECTIONS
         *(.bss)
         *(COMMON)
     } :data
+
+    /* 丢弃可能占用文件开头空间的非必要节（如 .note、.comment 等） */
+    /DISCARD/ : {
+        *(.note*)
+        *(.comment)
+        *(.eh_frame)
+        *(.eh_frame_hdr)
+    }
 }
