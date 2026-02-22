@@ -33,12 +33,4 @@ SECTIONS
         *(.bss)
         *(COMMON)
     } :data
-
-    /* 丢弃可能占用文件开头空间的非必要节（如 .note、.comment 等） */
-    /DISCARD/ : {
-        *(.note*)
-        *(.comment)
-        *(.eh_frame)
-        *(.eh_frame_hdr)
-    }
 }
