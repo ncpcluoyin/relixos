@@ -23,20 +23,11 @@ header_end:
 .code64
 .global _start
 _start:
-    /* 在长模式下，数据段寄存器仍然需要设置为 0 以使用平坦模型 */
-    mov $0, %ax
-    mov %ax, %ds
-    mov %ax, %es
-    mov %ax, %fs
-    mov %ax, %gs
-    mov %ax, %ss
-
     /* 设置栈指针（栈位于 .bss 中） */
     mov $stack_top, %rsp
 
     /* 调用 C 主函数（64 位调用约定，参数在 rdi 等寄存器） */
     call core_main
-
     /* 如果返回，则停机 */
     cli
     hlt

@@ -10,7 +10,7 @@ set(CMAKE_SYSTEM_PROCESSOR x86_64)
 set(CMAKE_POSITION_INDEPENDENT_CODE OFF)
 
 # 通用编译标志
-set(COMMON_FLAGS "-m64 -ffreestanding -fno-pie -nostdlib -nostdinc -fno-builtin -fno-stack-protector -O0")
+set(COMMON_FLAGS "-m64 -ffreestanding -fno-pie -nostdlib -nostdinc -fno-builtin -fno-stack-protector")
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${COMMON_FLAGS} -Wall -Wextra")
 set(CMAKE_ASM_FLAGS "${CMAKE_ASM_FLAGS} -Wa,--64")
@@ -19,7 +19,10 @@ set(CMAKE_ASM_FLAGS "${CMAKE_ASM_FLAGS} -Wa,--64")
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/headers)
 
 # 内核可执行文件
-add_executable(core.elf boot.S core.c)
+add_executable(core.elf 
+    core/core.c
+    core/boot.S
+)
 
 set_target_properties(core.elf PROPERTIES
     POSITION_INDEPENDENT_CODE OFF
@@ -56,7 +59,7 @@ add_custom_target(iso
 # ------------------ QEMU 运行目标 ------------------
 find_program(QEMU_EXECUTABLE qemu-system-x86_64)
 if(NOT QEMU_EXECUTABLE)
-    message(WARNING "qemu-system-x86_64 not found. 'run' targets will not work.")
+    message(WARNING "qemu-system-x86_64 not found. 'run' target will not work.")
 endif()
 
 # 查找 OVMF 固件
@@ -74,7 +77,7 @@ endif()
 
 # UEFI 启动
 add_custom_target(run
-    COMMAND ${QEMU_EXECUTABLE} -bios ${OVMF_FW} -cdrom ${CMAKE_CURRENT_BINARY_DIR}/relixos.iso
+    COMMAND ${QEMU_EXECUTABLE} -bios ${OVMF_FW} -cdrom ${CMAKE_CURRENT_BINARY_DIR}/relixos.iso -no-reboot -no-shutdown -serial stdio
     DEPENDS iso
     COMMENT "Starting RelixOS in QEMU (UEFI mode)"
     VERBATIM
