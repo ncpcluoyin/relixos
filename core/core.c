@@ -2,8 +2,9 @@
 #include"serial.h"
 
 void core_main(){
-    serial_putchar(DEFAULT_COM,'A');
-    char a[3] = {'M','A','\0'};
+    char m = 'm';
+    serial_putchar(DEFAULT_COM,m);
+    char * a = "suck";
     serial_puts(DEFAULT_COM,a);
     serial_putchar(DEFAULT_COM,'A');
 }

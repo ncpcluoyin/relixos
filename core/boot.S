@@ -25,6 +25,7 @@ header_end:
 _start:
     /* 设置栈指针（栈位于 .bss 中） */
     mov $stack_top, %rsp
+    and $~0xF, %rsp   # 将 rsp 调整为 16 字节对齐
 
     /* 调用 C 主函数（64 位调用约定，参数在 rdi 等寄存器） */
     call core_main
