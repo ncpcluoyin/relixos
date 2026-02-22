@@ -22,6 +22,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/headers)
 add_executable(core.elf 
     core/core.c
     core/boot.S
+    core/serial.c
 )
 
 set_target_properties(core.elf PROPERTIES
