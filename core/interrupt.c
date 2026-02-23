@@ -1,38 +1,80 @@
 #include "interrupt.h"
 #include "serial.h"
-#include "io.h"
+#include "pit.h"    // 为了 pit_handler
+
+// 外部数组，指向所有中断入口（在 boot.S 中定义）
+extern void* isr_stubs[];
 
 #define IDT_SIZE 256
 static struct idt_entry idt[IDT_SIZE];
 static struct idt_ptr idtp;
 
-extern void irq0_handler(void);   // 来自 boot.S
-
+// 设置一个 IDT 条目
 static void idt_set_gate(uint8_t num, uint64_t base, uint16_t sel, uint8_t flags) {
     idt[num].base_low  = base & 0xFFFF;
     idt[num].base_mid  = (base >> 16) & 0xFFFF;
     idt[num].base_high = (base >> 32) & 0xFFFFFFFF;
     idt[num].sel       = sel;
     idt[num].ist       = 0;
-    idt[num].flags     = flags;   // 直接使用传入的 flags，应包含存在位
+    idt[num].flags     = flags | 0x80; // 设置 Present 位
     idt[num].reserved  = 0;
 }
 
 void idt_init(void) {
-    // 先清零所有条目（可选，但确保未使用的条目 P=0 会导致 GPF，所以最好设置一个默认处理）
-    // 为简化，我们只设置向量32，其他条目保持未使用（P=0）。但 CPU 可能会因为未初始化而触发异常。
-    // 为了安全，可以将所有条目设为同一个处理函数（比如一个空处理），但这里先跳过。
-    // 我们假设在开启中断前不会发生其他中断，所以可以只设置需要的。
-    for (int i = 0; i < IDT_SIZE; i++) {
-        // 将所有条目初始化为空（P=0），这样如果意外触发会引发 GPF，但我们可以捕捉到？
-        // 更好的做法是设置一个默认处理，但为了简化，暂时留空。
-        idt[i].flags = 0; // 存在位为0，任何未设置的中断都会引起异常
-    }
-
-    uint64_t addr = (uint64_t)irq0_handler;
-    idt_set_gate(32, addr, 0x18, 0x8E); // 0x18 是64位代码段选择子，0x8E 是存在+中断门
-
     idtp.limit = sizeof(idt) - 1;
     idtp.base  = (uint64_t)&idt;
+
+    // 设置 0-31 号异常（使用 64 位代码段 0x18，中断门标志 0x8E）
+    for (int i = 0; i < 32; i++) {
+        idt_set_gate(i, (uint64_t)isr_stubs[i], 0x18, 0x8E);
+    }
+    // 设置 32-47 号 IRQ（同样使用中断门）
+    for (int i = 32; i < 48; i++) {
+        idt_set_gate(i, (uint64_t)isr_stubs[i], 0x18, 0x8E);
+    }
+
+    // 加载 IDT
     __asm__ volatile ("lidt %0" : : "m"(idtp));
+
+
+    // 打印 isr0 和 isr32 的地址
+    serial_puts(COM1, "isr0 addr: ");
+    serial_puthex(COM1, (uint64_t)isr_stubs[0]);
+    serial_putchar(COM1, '\n');
+    serial_puts(COM1, "isr32 addr: ");
+    serial_puthex(COM1, (uint64_t)isr_stubs[32]);
+    serial_putchar(COM1, '\n');
+}
+
+// 中断处理 C 函数
+/*
+void isr_handler(uint64_t int_no, uint64_t err_code) {
+    // 简单打印中断号和错误码（通过串口）
+    serial_puts(COM1, "ISR: ");
+    serial_puthex(COM1, int_no);
+    if (err_code) {
+        serial_puts(COM1, " err=");
+        serial_puthex(COM1, err_code);
+    }
+    serial_putchar(COM1, '\n');
+
+    // 如果是时钟中断（IRQ0，映射到 32），调用 pit_handler
+    if (int_no == 32) {
+        pit_handler();
+        return;
+    }
+
+    // 如果是页错误（14），停机
+    if (int_no == 14) {
+        serial_puts(COM1, "Page fault! Halting.\n");
+        while(1) __asm__("hlt");
+    }
+    // 其他异常可添加处理
+}
+*/
+void isr_handler(uint64_t int_no, uint64_t err_code) {//暂用简化版
+    serial_putchar(COM1, 'I');
+    if (int_no == 32) {
+        pit_handler();   // 确保 pit_handler 也只做最小操作
+    }
 }

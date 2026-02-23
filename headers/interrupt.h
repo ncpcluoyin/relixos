@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-// IDT 条目（64 位模式）
+// IDT 条目结构（64 位模式）
 struct idt_entry {
     uint16_t base_low;      // 处理程序地址低 16 位
     uint16_t sel;           // 代码段选择子（内核代码段，0x18）

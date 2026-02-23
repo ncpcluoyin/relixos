@@ -9,6 +9,8 @@ void pit_init(uint32_t frequency);
 // 获取当前 tick 计数（由时钟中断递增）
 uint64_t pit_get_ticks(void);
 
+void pit_handler(void);
+
 #define PIT_CH0_DATA     0x40
 #define PIT_CH1_DATA     0x41
 #define PIT_CH2_DATA     0x42

@@ -183,26 +183,136 @@ loop:
 /* 标记栈不需要可执行权限 */
 .section .note.GNU-stack,"",@progbits
 
-# 新增 IRQ0 专用处理程序
-.global irq0_handler
-irq0_handler:
+/******************************************************************************
+ * 中断处理入口
+ *****************************************************************************/
+
+/* 宏：无错误码的中断 */
+.macro ISR_NOERRCODE num
+.global isr\num
+isr\num:
+    pushq $0                  # 伪错误码（占位）
+    pushq $\num               # 中断号
+    jmp isr_common_stub
+.endm
+
+/* 宏：有错误码的中断（CPU 已压入错误码） */
+.macro ISR_ERRCODE num
+.global isr\num
+isr\num:
+    pushq $\num               # 中断号（CPU 已压入错误码）
+    jmp isr_common_stub
+.endm
+
+/* 定义 0-31 号异常（部分有错误码） */
+ISR_NOERRCODE 0
+ISR_NOERRCODE 1
+ISR_NOERRCODE 2
+ISR_NOERRCODE 3
+ISR_NOERRCODE 4
+ISR_NOERRCODE 5
+ISR_NOERRCODE 6
+ISR_NOERRCODE 7
+ISR_ERRCODE   8               # 双重错误
+ISR_NOERRCODE 9
+ISR_ERRCODE   10
+ISR_ERRCODE   11
+ISR_ERRCODE   12
+ISR_ERRCODE   13
+ISR_ERRCODE   14              # 页错误
+ISR_NOERRCODE 15
+ISR_NOERRCODE 16
+ISR_NOERRCODE 17
+ISR_ERRCODE   18
+ISR_NOERRCODE 19
+ISR_NOERRCODE 20
+ISR_NOERRCODE 21
+ISR_NOERRCODE 22
+ISR_NOERRCODE 23
+ISR_NOERRCODE 24
+ISR_NOERRCODE 25
+ISR_NOERRCODE 26
+ISR_NOERRCODE 27
+ISR_NOERRCODE 28
+ISR_NOERRCODE 29
+ISR_ERRCODE   30
+ISR_NOERRCODE 31
+
+/* 定义 32-47 用于 IRQ（无错误码） */
+ISR_NOERRCODE 32
+ISR_NOERRCODE 33
+ISR_NOERRCODE 34
+ISR_NOERRCODE 35
+ISR_NOERRCODE 36
+ISR_NOERRCODE 37
+ISR_NOERRCODE 38
+ISR_NOERRCODE 39
+ISR_NOERRCODE 40
+ISR_NOERRCODE 41
+ISR_NOERRCODE 42
+ISR_NOERRCODE 43
+ISR_NOERRCODE 44
+ISR_NOERRCODE 45
+ISR_NOERRCODE 46
+ISR_NOERRCODE 47
+
+/* 通用中断处理程序 */
+isr_common_stub:
+    /* 保存所有通用寄存器 */
     pushq %rax
+    pushq %rbx
     pushq %rcx
     pushq %rdx
     pushq %rsi
     pushq %rdi
+    pushq %rbp
     pushq %r8
     pushq %r9
     pushq %r10
     pushq %r11
-    call irq0_c_handler
+    pushq %r12
+    pushq %r13
+    pushq %r14
+    pushq %r15
+
+    /* 此时栈布局（从低到高）：
+        保存的寄存器（15*8=120字节）
+        中断号（8字节）
+        错误码（8字节）
+        CPU 自动压入的旧 rip, cs, rflags, rsp, ss（共40字节）
+    */
+    /* 将中断号和错误码作为参数传递给 C 函数 */
+    movq 15*8(%rsp), %rdi   // 中断号
+    movq 15*8+8(%rsp), %rsi // 错误码
+    call isr_handler
+
+    /* 恢复寄存器 */
+    popq %r15
+    popq %r14
+    popq %r13
+    popq %r12
     popq %r11
     popq %r10
     popq %r9
     popq %r8
+    popq %rbp
     popq %rdi
     popq %rsi
     popq %rdx
     popq %rcx
+    popq %rbx
     popq %rax
+
+    /* 移除栈上的中断号和错误码 */
+    addq $16, %rsp
     iretq
+
+.section .rodata
+.global isr_stubs
+isr_stubs:
+    .quad isr0, isr1, isr2, isr3, isr4, isr5, isr6, isr7
+    .quad isr8, isr9, isr10, isr11, isr12, isr13, isr14, isr15
+    .quad isr16, isr17, isr18, isr19, isr20, isr21, isr22, isr23
+    .quad isr24, isr25, isr26, isr27, isr28, isr29, isr30, isr31
+    .quad isr32, isr33, isr34, isr35, isr36, isr37, isr38, isr39
+    .quad isr40, isr41, isr42, isr43, isr44, isr45, isr46, isr47

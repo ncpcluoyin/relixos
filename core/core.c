@@ -17,6 +17,9 @@ void core_main(uint64_t mb_info_addr) {
     serial_puts(COM1,"run pit_init\n");
     pit_init(100);            // 100 Hz 时钟
     serial_puts(COM1,"start int\n");
+
+    __asm__ volatile ("int $0x32");   // 触发 IRQ0 对应的中断向量
+    
     __asm__ volatile ("sti"); // 开启中断
     uint64_t last_ticks = 0;
     while (1) {
