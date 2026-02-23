@@ -1,3 +1,5 @@
+//serial.c
+
 #include "serial.h"
 #include "io.h"
 
@@ -40,4 +42,26 @@ int serial_data_available(uint16_t port) {
 char serial_getchar(uint16_t port) {
     while ((inb(port + 5) & 0x01) == 0);
     return inb(port);
+}
+
+void serial_putnum(uint16_t port, uint32_t num) {
+    char buf[12];          // 32 位十进制数最多 10 位，加上结束符足够
+    int i = 0;
+
+    // 处理 0 的特殊情况
+    if (num == 0) {
+        serial_putchar(port, '0');
+        return;
+    }
+
+    // 从低位到高位依次取数字，存入缓冲区
+    while (num > 0) {
+        buf[i++] = '0' + (num % 10);
+        num /= 10;
+    }
+
+    // 逆序输出缓冲区中的字符
+    while (i > 0) {
+        serial_putchar(port, buf[--i]);
+    }
 }

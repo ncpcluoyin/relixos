@@ -180,8 +180,6 @@ loop:
     hlt
     jmp loop
 
-/* 标记栈不需要可执行权限 */
-.section .note.GNU-stack,"",@progbits
 
 /******************************************************************************
  * 中断处理入口
@@ -256,7 +254,20 @@ ISR_NOERRCODE 45
 ISR_NOERRCODE 46
 ISR_NOERRCODE 47
 
+.global isr_stubs
+isr_stubs:
+    .quad isr0, isr1, isr2, isr3, isr4, isr5, isr6, isr7
+    .quad isr8, isr9, isr10, isr11, isr12, isr13, isr14, isr15
+    .quad isr16, isr17, isr18, isr19, isr20, isr21, isr22, isr23
+    .quad isr24, isr25, isr26, isr27, isr28, isr29, isr30, isr31
+    .quad isr32, isr33, isr34, isr35, isr36, isr37, isr38, isr39
+    .quad isr40, isr41, isr42, isr43, isr44, isr45, isr46, isr47
+
+/* 标记栈不需要可执行权限 */
+.section .note.GNU-stack,"",@progbits
+
 /* 通用中断处理程序 */
+
 isr_common_stub:
     /* 保存所有通用寄存器 */
     pushq %rax
@@ -275,15 +286,12 @@ isr_common_stub:
     pushq %r14
     pushq %r15
 
-    /* 此时栈布局（从低到高）：
-        保存的寄存器（15*8=120字节）
-        中断号（8字节）
-        错误码（8字节）
-        CPU 自动压入的旧 rip, cs, rflags, rsp, ss（共40字节）
-    */
-    /* 将中断号和错误码作为参数传递给 C 函数 */
-    movq 15*8(%rsp), %rdi   // 中断号
-    movq 15*8+8(%rsp), %rsi // 错误码
+    /* 传递参数给 C 函数 isr_handler：
+     *   rdi = 中断号（位于 15*8+8(%rsp)）
+     *   rsi = 错误码（位于 15*8(%rsp)）
+     */
+    movq 15*8+8(%rsp), %rdi   // 中断号 -> 第一个参数
+    movq 15*8(%rsp), %rsi     // 错误码 -> 第二个参数
     call isr_handler
 
     /* 恢复寄存器 */
@@ -303,16 +311,6 @@ isr_common_stub:
     popq %rbx
     popq %rax
 
-    /* 移除栈上的中断号和错误码 */
+    /* 移除栈上的中断号和错误码（16 字节） */
     addq $16, %rsp
     iretq
-
-.section .rodata
-.global isr_stubs
-isr_stubs:
-    .quad isr0, isr1, isr2, isr3, isr4, isr5, isr6, isr7
-    .quad isr8, isr9, isr10, isr11, isr12, isr13, isr14, isr15
-    .quad isr16, isr17, isr18, isr19, isr20, isr21, isr22, isr23
-    .quad isr24, isr25, isr26, isr27, isr28, isr29, isr30, isr31
-    .quad isr32, isr33, isr34, isr35, isr36, isr37, isr38, isr39
-    .quad isr40, isr41, isr42, isr43, isr44, isr45, isr46, isr47

@@ -1,9 +1,14 @@
+//pic.c
+
 #include "pic.h"
 #include "serial.h"
 #include "io.h"
 
 // 重新映射 IRQ
 void pic_remap(int offset1, int offset2) {
+    //debug out
+    serial_puts(COM1,"pic_remap called\n");
+
     // 保存原有屏蔽字（可选）
     uint8_t a1 = inb(PIC1_DATA);
     uint8_t a2 = inb(PIC2_DATA);
@@ -21,9 +26,14 @@ void pic_remap(int offset1, int offset2) {
     // 恢复原有屏蔽字（或设置新屏蔽）
     outb(PIC1_DATA, a1);
     outb(PIC2_DATA, a2);
+
+    //debug out
+    serial_puts(COM1,"pic_remap done\n");
 }
 
 void pic_send_eoi(int irq) {
+    //debug out
+    serial_puts(COM1,"pic_send_eoi called\n");
     if (irq >= 8) {
         outb(PIC2_COMMAND, 0x20);   // 非特定 EOI
     }

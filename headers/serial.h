@@ -25,4 +25,7 @@ int serial_data_available(uint16_t port);
 // 读取一个字符（阻塞）
 char serial_getchar(uint16_t port);
 
+// 输出一个数字(unsigned)
+void serial_putnum(uint16_t port, uint32_t num);
+
 #endif
