@@ -16,7 +16,7 @@ header_end:
 .section .bss
 .align 16
 stack_bottom:
-    .skip 16384                    /* 16 KB 栈 */
+    .skip 524288          // 512 KB  栈
 stack_top:
 
 .section .data
@@ -182,3 +182,27 @@ loop:
 
 /* 标记栈不需要可执行权限 */
 .section .note.GNU-stack,"",@progbits
+
+# 新增 IRQ0 专用处理程序
+.global irq0_handler
+irq0_handler:
+    pushq %rax
+    pushq %rcx
+    pushq %rdx
+    pushq %rsi
+    pushq %rdi
+    pushq %r8
+    pushq %r9
+    pushq %r10
+    pushq %r11
+    call irq0_c_handler
+    popq %r11
+    popq %r10
+    popq %r9
+    popq %r8
+    popq %rdi
+    popq %rsi
+    popq %rdx
+    popq %rcx
+    popq %rax
+    iretq

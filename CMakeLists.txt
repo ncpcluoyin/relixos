@@ -23,6 +23,9 @@ add_executable(core.elf
     core/core.c
     core/boot.S
     core/serial.c
+    core/interrupt.c
+    core/pic.c
+    core/pit.c
 )
 
 set_target_properties(core.elf PROPERTIES
@@ -78,7 +81,7 @@ endif()
 
 # UEFI 启动
 add_custom_target(run
-    COMMAND ${QEMU_EXECUTABLE} -bios ${OVMF_FW} -cdrom ${CMAKE_CURRENT_BINARY_DIR}/relixos.iso -no-reboot -no-shutdown -serial stdio
+    COMMAND ${QEMU_EXECUTABLE} -bios ${OVMF_FW} -cdrom ${CMAKE_CURRENT_BINARY_DIR}/relixos.iso -no-reboot -no-shutdown -serial stdio -d int,cpu_reset -D qemu.log
     DEPENDS iso
     COMMENT "Starting RelixOS in QEMU (UEFI mode)"
     VERBATIM
